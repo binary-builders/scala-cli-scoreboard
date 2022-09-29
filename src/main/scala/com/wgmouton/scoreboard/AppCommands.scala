@@ -1,7 +1,7 @@
 package com.wgmouton.scoreboard
 
 import com.wgmouton.scoreboard.Processor.{loop, printOutput, printRanking, sortScoreboard}
-import wvlet.airframe.launcher._
+import wvlet.airframe.launcher.{option, command, argument}
 import wvlet.log.{LogLevel, LogSupport, Logger}
 
 import scala.io.{Source, StdIn}
@@ -16,16 +16,17 @@ import java.nio.file.{Files, Paths}
  * @param help
  */
 class AppCommands(
-           @option(prefix = "-h,--help", description = "display help messages", isHelp = true)
-           help: Boolean = false
-         ) {
-
-    Logger.setDefaultLogLevel(LogLevel.ERROR)
+                   @option(prefix = "-h,--help", description = "display help messages", isHelp = true)
+                   help: Boolean = false,
+                   @option(prefix = "-l,--log_level", description = "log level")
+                   loglevel: Option[LogLevel] = None
+                 ) extends LogSupport {
+  Logger.setDefaultLogLevel(loglevel.getOrElse(LogLevel.ERROR))
 
   /**
    * The command required by the project. Provide it filepath or '-' to indicate the use of stdIn and will printout the rankings.
    *
-   * @param input filepath or '-'
+   * @param input             filepath or '-'
    * @param useStrictOrdering Boolean indicates whether to keep the ranking positions 1, 2, 3, 3, 4 or 1, 2, 3, 3, 5. By default this is false
    */
   @command(usage = "[filepath] | [-] for stdIn", description = "calculate rankings for teams in a match")
@@ -37,8 +38,9 @@ class AppCommands(
                     ): Unit = {
     input.flatMap {
       // Fetches from stdIn
-      case "-" => Map.empty[String, Int]
-        Option(StdIn.readLine()).map(s => loop[String](s, Map.empty, _ => Option(StdIn.readLine())))
+      case "-" =>
+        //We provide a empty string here as we will get het the first line from stdIn during the first run of the loop.
+        loop[String]("", Map.empty, _ => Option(StdIn.readLine())).some
 
       //Fetches the matches from a file
       case filepath if Files.exists(Paths.get(filepath)) =>
@@ -60,8 +62,8 @@ class AppCommands(
   /**
    * Just something cool. This will generate a bush of teams and calculate the rankings for indicated amount of matches.
    *
-   * @param teams   default is 20
-   * @param matches default is 50
+   * @param teams             default is 20
+   * @param matches           default is 50
    * @param useStrictOrdering Boolean indicates whether to keep the ranking positions 1, 2, 3, 3, 4 or 1, 2, 3, 3, 5. By default this is true
    */
   @command(usage = "-t 20 -m 50 ", description = "calculate rankings for random teams with set matches in a match")

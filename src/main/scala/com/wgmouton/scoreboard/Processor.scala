@@ -16,7 +16,8 @@ trait Processor extends LogSupport {
    * @return
    */
   protected def parseMatch: String => Option[Match] = {
-    case matchStringRegex(t1n, t1s, t2n, t2s) =>
+    case text@matchStringRegex(t1n, t1s, t2n, t2s) =>
+      logger.debug(String.format("Parsing: '%s'", text))
       for (t1s <- t1s.toIntOption; t2s <- t2s.toIntOption) yield Match(TeamScore(t1n, t1s), TeamScore(t2n, t2s))
     case text =>
       logger.error(String.format("failed to parse match: '%s', expected format 'Lions 3, Snakes 3'", text))
