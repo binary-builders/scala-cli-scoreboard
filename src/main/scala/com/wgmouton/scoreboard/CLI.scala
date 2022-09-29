@@ -15,7 +15,7 @@ import java.nio.file.{Files, Paths}
  *
  * @param help
  */
-class CLI(
+class MyApp(
 //           @option(prefix = "-h,--help", description = "display help messages", isHelp = true)
 //           help: Boolean = false
          ) {
@@ -90,16 +90,16 @@ class CLI(
 
 import wvlet.airframe.launcher._
 
-class MyApp(@option(prefix = "-h,--help", description = "display help messages", isHelp = true)
-            help: Boolean = false,
-            @option(prefix = "-p", description = "port number")
-            port: Int = 8080) {
-
-  @command(isDefault = true)
-  def default: Unit = {
-    println(s"Hello airframe. port:${port}")
-  }
-}
+//class MyApp(@option(prefix = "-h,--help", description = "display help messages", isHelp = true)
+//            help: Boolean = false,
+//            @option(prefix = "-p", description = "port number")
+//            port: Int = 8080) {
+//
+//  @command(isDefault = true)
+//  def default: Unit = {
+//    println(s"Hello airframe. port:${port}")
+//  }
+//}
 
 object Main extends App {
   Launcher.execute[MyApp]("")
