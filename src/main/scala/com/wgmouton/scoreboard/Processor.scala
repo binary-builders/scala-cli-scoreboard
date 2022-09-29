@@ -78,27 +78,28 @@ trait Processor extends LogSupport {
    * Prints the output based on the implementation of the function printOutput.
    * The second recursive loop loops over the sorted scoreboard to print the output in the required format.
    *
-   * @param teamScores sorted list of the scoreboard as a List[(String, Int)]
-   * @param index the index of the teamScores list
-   * @param lastPosition  the last position of the score
-   * @param lastScore  the last score that was supplied
+   * @param teamScores   sorted list of the scoreboard as a List[(String, Int)]
+   * @param index        the index of the teamScores list
+   * @param lastPosition the last position of the score
+   * @param lastScore    the last score that was supplied
    */
   @tailrec
-  final def printRanking(teamScores: List[(String, Int)], index: Int = 0, lastPosition: Int = 0, lastScore: Int = -1): Unit = {
+  final def printRanking(teamScores: List[(String, Int)], useStrictOrdering: Boolean = false, index: Int = 0, lastPosition: Int = 0, lastScore: Int = -1): Unit = {
     val ptOrPts: Int => String = {
       case 1 => "pt"
       case _ => "pts"
     }
 
-    val nextIndex = index + 1
+    val nextPositionOrIndex = if(useStrictOrdering) lastPosition + 1 else index + 1
+
     teamScores match {
       case Nil =>
       case (name, score) :: tail if score == lastScore =>
         printOutput(String.format("%d. %s, %d %s", lastPosition, name, score, ptOrPts(score)))
-        printRanking(tail, nextIndex, lastPosition, score)
-      case (name, score) :: tail =>
-        printOutput(String.format("%d. %s, %d %s", nextIndex, name, score, ptOrPts(score)))
-        printRanking(tail, nextIndex, nextIndex, score)
+        printRanking(tail, useStrictOrdering, nextPositionOrIndex, lastPosition, score)
+      case (name, score) :: tail  =>
+        printOutput(String.format("%d. %s, %d %s", nextPositionOrIndex, name, score, ptOrPts(score)))
+        printRanking(tail, useStrictOrdering, nextPositionOrIndex, nextPositionOrIndex, score)
     }
   }
 

@@ -26,11 +26,14 @@ class AppCommands(
    * The command required by the project. Provide it filepath or '-' to indicate the use of stdIn and will printout the rankings.
    *
    * @param input filepath or '-'
+   * @param useStrictOrdering Boolean indicates whether to keep the ranking positions 1, 2, 3, 3, 4 or 1, 2, 3, 3, 5. By default this is false
    */
   @command(usage = "[filepath] | [-] for stdIn", description = "calculate rankings for teams in a match")
   final def rankings(
                       @argument(name = "input", description = "the path to a file or '-' to read input from stdin")
                       input: Option[String] = None,
+                      @option(prefix = "-s,--strict", description = "[true/false] indicates whether to keep the ranking positions 1, 2, 3, 3, 4 or 1, 2, 3, 3, 5. By default this is false")
+                      useStrictOrdering: Option[Boolean] = None,
                     ): Unit = {
     input.flatMap {
       // Fetches from stdIn
@@ -50,7 +53,7 @@ class AppCommands(
         System.exit(1)
         None
     } foreach { scoreboard =>
-      printRanking(sortScoreboard(scoreboard))
+      printRanking(sortScoreboard(scoreboard), useStrictOrdering.getOrElse(false))
     }
   }
 
@@ -59,6 +62,7 @@ class AppCommands(
    *
    * @param teams   default is 20
    * @param matches default is 50
+   * @param useStrictOrdering Boolean indicates whether to keep the ranking positions 1, 2, 3, 3, 4 or 1, 2, 3, 3, 5. By default this is true
    */
   @command(usage = "-t 20 -m 50 ", description = "calculate rankings for random teams with set matches in a match")
   final def random(
@@ -66,6 +70,8 @@ class AppCommands(
                     teams: Int = 20,
                     @option(prefix = "-m,--matches", description = "the amount of matches")
                     matches: Int = 50,
+                    @option(prefix = "-s,--strict", description = "the path to a file or '-' to read input from stdin")
+                    useStrictOrdering: Option[Boolean] = None,
                   ): Unit = {
 
     printOutput(String.format("Matches: %d | Teams: %d\n", matches, teams))
@@ -81,6 +87,6 @@ class AppCommands(
     }.iterator
 
     val scoreboard = loop[Iterator[String]](input, Map.empty, _.nextOption())
-    printRanking(sortScoreboard(scoreboard))
+    printRanking(sortScoreboard(scoreboard), useStrictOrdering = false)
   }
 }

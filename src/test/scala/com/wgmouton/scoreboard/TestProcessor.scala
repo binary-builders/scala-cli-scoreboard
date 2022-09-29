@@ -71,7 +71,8 @@ class TestProcessor extends AnyFunSuite with Processor {
     assertResult(expectedScoreboardList)(sortedScoreboard)
   }
 
-  test("The test output matches the requirements") {
+  test("The test output matches the requirements (No strict ordering)") {
+    outputLog = Seq.empty
     val expectedOutput = Seq(
       "1. Tarantulas, 6 pts",
       "2. Lions, 5 pts",
@@ -93,7 +94,35 @@ class TestProcessor extends AnyFunSuite with Processor {
     printRanking(inputScoreboard.toList.sortWith({
       case ((t1Name, t1Score), (t2Name, t2Score)) if t1Score == t2Score => t1Name < t2Name
       case ((_, t1Score), (_, t2Score)) => t1Score > t2Score
-    }), 0, -1)
+    }), useStrictOrdering = false, 0, 0,-1)
+
+    assertResult(expectedOutput)(outputLog)
+  }
+
+  test("The test output matches the requirements (Strict ordering)") {
+    outputLog = Seq.empty
+    val expectedOutput = Seq(
+      "1. Tarantulas, 6 pts",
+      "2. Lions, 5 pts",
+      "3. Bobs, 1 pt",
+      "3. FC Awesome, 1 pt",
+      "3. Snakes, 1 pt",
+      "4. Grouches, 0 pts",
+    )
+
+    val inputScoreboard = Map(
+      "FC Awesome" -> 1,
+      "Lions" -> 5,
+      "Grouches" -> 0,
+      "Snakes" -> 1,
+      "Bobs" -> 1,
+      "Tarantulas" -> 6,
+    )
+
+    printRanking(inputScoreboard.toList.sortWith({
+      case ((t1Name, t1Score), (t2Name, t2Score)) if t1Score == t2Score => t1Name < t2Name
+      case ((_, t1Score), (_, t2Score)) => t1Score > t2Score
+    }), useStrictOrdering = true, 0, 0,-1)
 
     assertResult(expectedOutput)(outputLog)
   }
